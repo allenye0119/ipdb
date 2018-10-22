@@ -8,6 +8,7 @@ from __future__ import print_function
 import os
 import sys
 
+from bdb import BdbQuit
 from contextlib import contextmanager
 
 __version__= "0.10.3"
@@ -43,7 +44,7 @@ else:
 debugger_cls = shell.debugger_cls
 def_colors = shell.colors
 
-def _init_pdb(context=3, commands=[]):
+def _init_pdb(context=7, commands=[]):
     try:
         p = debugger_cls(def_colors, context=context)
     except TypeError:
@@ -60,7 +61,7 @@ def wrap_sys_excepthook():
         sys.excepthook = BdbQuit_excepthook
 
 
-def set_trace(frame=None, context=3):
+def set_trace(frame=None, context=7):
     wrap_sys_excepthook()
     if frame is None:
         frame = sys._getframe().f_back
@@ -101,6 +102,8 @@ def runeval(expression, globals=None, locals=None):
 def launch_ipdb_on_exception():
     try:
         yield
+    except (KeyboardInterrupt, BdbQuit):
+        pass
     except Exception:
         e, m, tb = sys.exc_info()
         print(m.__repr__(), file=sys.stderr)
